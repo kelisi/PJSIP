@@ -1,0 +1,7 @@
+--id sip:1001@172.25.1.144
+--registrar sip:172.25.1.144;transport=tcp
+--realm *
+--username 1001
+--password 1234
+--set-qos
+--video
