@@ -20,16 +20,13 @@
 #ifndef __PJMEDIA_RTP_H__
 #define __PJMEDIA_RTP_H__
 
-
 /**
  * @file rtp.h
  * @brief RTP packet and RTP session declarations.
  */
 #include <pjmedia/types.h>
 
-
 PJ_BEGIN_DECL
-
 
 /**
  * @defgroup PJMED_RTP RTP Session and Encapsulation (RFC 3550)
@@ -74,9 +71,8 @@ PJ_BEGIN_DECL
  */
 
 #ifdef _MSC_VER
-#   pragma warning(disable:4214)    // bit field types other than int
+#pragma warning(disable : 4214) // bit field types other than int
 #endif
-
 
 /**
  * RTP packet header. Note that all RTP functions here will work with this
@@ -86,24 +82,24 @@ PJ_BEGIN_DECL
 #pragma pack(1)
 struct pjmedia_rtp_hdr
 {
-#if defined(PJ_IS_BIG_ENDIAN) && (PJ_IS_BIG_ENDIAN!=0)
-    pj_uint16_t v:2;		/**< packet type/version	    */
-    pj_uint16_t p:1;		/**< padding flag		    */
-    pj_uint16_t x:1;		/**< extension flag		    */
-    pj_uint16_t cc:4;		/**< CSRC count			    */
-    pj_uint16_t m:1;		/**< marker bit			    */
-    pj_uint16_t pt:7;		/**< payload type		    */
+#if defined(PJ_IS_BIG_ENDIAN) && (PJ_IS_BIG_ENDIAN != 0)
+	pj_uint16_t v : 2;  /**< packet type/version	    */
+	pj_uint16_t p : 1;  /**< padding flag		    */
+	pj_uint16_t x : 1;  /**< extension flag		    */
+	pj_uint16_t cc : 4; /**< CSRC count			    */
+	pj_uint16_t m : 1;  /**< marker bit			    */
+	pj_uint16_t pt : 7; /**< payload type		    */
 #else
-    pj_uint16_t cc:4;		/**< CSRC count			    */
-    pj_uint16_t x:1;		/**< header extension flag	    */ 
-    pj_uint16_t p:1;		/**< padding flag		    */
-    pj_uint16_t v:2;		/**< packet type/version	    */
-    pj_uint16_t pt:7;		/**< payload type		    */
-    pj_uint16_t m:1;		/**< marker bit			    */
+	pj_uint16_t cc : 4; /**< CSRC count			    */
+	pj_uint16_t x : 1;  /**< header extension flag	    */
+	pj_uint16_t p : 1;  /**< padding flag		    */
+	pj_uint16_t v : 2;  /**< packet type/version	    */
+	pj_uint16_t pt : 7; /**< payload type		    */
+	pj_uint16_t m : 1;  /**< marker bit	（h264 视频当作一帧的结束包标志）	    */
 #endif
-    pj_uint16_t seq;		/**< sequence number		    */
-    pj_uint32_t ts;		/**< timestamp			    */
-    pj_uint32_t ssrc;		/**< synchronization source	    */
+	pj_uint16_t seq;  /**< sequence number		    */
+	pj_uint32_t ts;   /**< timestamp			    */
+	pj_uint32_t ssrc; /**< synchronization source	    */
 };
 #pragma pack()
 
@@ -112,14 +108,13 @@ struct pjmedia_rtp_hdr
  */
 typedef struct pjmedia_rtp_hdr pjmedia_rtp_hdr;
 
-
 /**
  * RTP extension header.
  */
 struct pjmedia_rtp_ext_hdr
 {
-    pj_uint16_t	profile_data;	/**< Profile data.	    */
-    pj_uint16_t	length;		/**< Length.		    */
+	pj_uint16_t profile_data; /**< Profile data.	    */
+	pj_uint16_t length;		  /**< Length.		    */
 };
 
 /**
@@ -132,10 +127,10 @@ typedef struct pjmedia_rtp_ext_hdr pjmedia_rtp_ext_hdr;
  */
 struct pjmedia_rtp_dec_hdr
 {
-    /* RTP extension header output decode */
-    pjmedia_rtp_ext_hdr *ext_hdr;
-    pj_uint32_t *ext;
-    unsigned ext_len;
+	/* RTP extension header output decode */
+	pjmedia_rtp_ext_hdr *ext_hdr;
+	pj_uint32_t *ext;
+	unsigned ext_len;
 };
 
 /**
@@ -150,9 +145,9 @@ typedef struct pjmedia_rtp_dec_hdr pjmedia_rtp_dec_hdr;
  */
 struct pjmedia_rtp_dtmf_event
 {
-    pj_uint8_t	event;	    /**< Event type ID.	    */
-    pj_uint8_t	e_vol;	    /**< Event volume.	    */
-    pj_uint16_t	duration;   /**< Event duration.    */
+	pj_uint8_t event;	 /**< Event type ID.	    */
+	pj_uint8_t e_vol;	 /**< Event volume.	    */
+	pj_uint16_t duration; /**< Event duration.    */
 };
 
 /**
@@ -162,17 +157,16 @@ typedef struct pjmedia_rtp_dtmf_event pjmedia_rtp_dtmf_event;
 
 #pragma pack()
 
-
 /**
  * A generic sequence number management, used by both RTP and RTCP.
  */
 struct pjmedia_rtp_seq_session
 {
-    pj_uint16_t	    max_seq;	    /**< Highest sequence number heard	    */
-    pj_uint32_t	    cycles;	    /**< Shifted count of seq number cycles */
-    pj_uint32_t	    base_seq;	    /**< Base seq number		    */
-    pj_uint32_t	    bad_seq;        /**< Last 'bad' seq number + 1	    */
-    pj_uint32_t	    probation;      /**< Sequ. packets till source is valid */
+	pj_uint16_t max_seq;   /**< Highest sequence number heard	    */
+	pj_uint32_t cycles;	/**< Shifted count of seq number cycles */
+	pj_uint32_t base_seq;  /**< Base seq number		    */
+	pj_uint32_t bad_seq;   /**< Last 'bad' seq number + 1	    */
+	pj_uint32_t probation; /**< Sequ（试用期）. packets till source is valid */
 };
 
 /**
@@ -180,19 +174,18 @@ struct pjmedia_rtp_seq_session
  */
 typedef struct pjmedia_rtp_seq_session pjmedia_rtp_seq_session;
 
-
 /**
  * RTP session descriptor.
  */
 struct pjmedia_rtp_session
 {
-    pjmedia_rtp_hdr	    out_hdr;    /**< Saved hdr for outgoing pkts.   */
-    pjmedia_rtp_seq_session seq_ctrl;   /**< Sequence number management.    */
-    pj_uint16_t		    out_pt;	/**< Default outgoing payload type. */
-    pj_uint32_t		    out_extseq; /**< Outgoing extended seq #.	    */
-    pj_bool_t		    has_peer_ssrc;/**< Has peer SSRC?		    */
-    pj_uint32_t		    peer_ssrc;  /**< Peer SSRC.			    */
-    pj_uint32_t		    received;   /**< Number of received packets.    */
+	pjmedia_rtp_hdr out_hdr;		  /**< Saved hdr for outgoing pkts.   */
+	pjmedia_rtp_seq_session seq_ctrl; /**< Sequence number management.    */
+	pj_uint16_t out_pt;				  /**< Default outgoing payload type. */
+	pj_uint32_t out_extseq;			  /**< Outgoing extended seq #.	    */
+	pj_bool_t has_peer_ssrc;		  /**< Has peer SSRC?		    */
+	pj_uint32_t peer_ssrc;			  /**< Peer SSRC.			    */
+	pj_uint32_t received;			  /**< Number of received packets.    */
 };
 
 /**
@@ -200,36 +193,36 @@ struct pjmedia_rtp_session
  */
 typedef struct pjmedia_rtp_session pjmedia_rtp_session;
 
-
 /**
  * This structure is used to receive additional information about the
  * state of incoming RTP packet.
  */
 struct pjmedia_rtp_status
 {
-    union {
-	struct flag {
-	    int	bad:1;	    /**< General flag to indicate that sequence is
+	union {
+		struct flag
+		{
+			int bad : 1;	   /**< General flag to indicate that sequence is
 				 bad, and application should not process
 				 this packet. More information will be given
 				 in other flags.			    */
-	    int badpt:1;    /**< Bad payload type.			    */
-	    int badssrc:1;  /**< Bad SSRC				    */
-	    int	dup:1;	    /**< Indicates duplicate packet		    */
-	    int	outorder:1; /**< Indicates out of order packet		    */
-	    int	probation:1;/**< Indicates that session is in probation
+			int badpt : 1;	 /**< Bad payload type.			    */
+			int badssrc : 1;   /**< Bad SSRC				    */
+			int dup : 1;	   /**< Indicates duplicate packet		    */
+			int outorder : 1;  /**< Indicates out of order packet		    */
+			int probation : 1; /**< Indicates that session is in probation
 				 until more packets are received.	    */
-	    int	restart:1;  /**< Indicates that sequence number has made
+			int restart : 1;   /**< Indicates that sequence number has made
 				 a large jump, and internal base sequence
 				 number has been adjusted.		    */
-	} flag;		    /**< Status flags.				    */
+		} flag;				   /**< Status flags.				    */
 
-	pj_uint16_t value;  /**< Status value, to conveniently address all
+		pj_uint16_t value; /**< Status value, to conveniently address all
 				 flags.					    */
 
-    } status;		    /**< Status information union.		    */
+	} status; /**< Status information union.		    */
 
-    pj_uint16_t	diff;	    /**< Sequence number difference from previous
+	pj_uint16_t diff; /**< Sequence number difference from previous
 				 packet. Normally the value should be 1.    
 				 Value greater than one may indicate packet
 				 loss. If packet with lower sequence is
@@ -238,13 +231,12 @@ struct pjmedia_rtp_status
 				 value will be one.			    */
 };
 
-
 /**
  * RTP session settings.
  */
 typedef struct pjmedia_rtp_session_setting
 {
-    pj_uint8_t	     flags;	    /**< Bitmask flags to specify whether such
+	pj_uint8_t flags;		 /**< Bitmask flags to specify whether such
 				         field is set. Bitmask contents are:
 					 (bit #0 is LSB)
 					 bit #0: default payload type
@@ -252,19 +244,17 @@ typedef struct pjmedia_rtp_session_setting
 					 bit #2: sequence
 					 bit #3: timestamp
 					 bit #4: peer SSRC		    */
-    int		     default_pt;    /**< Default payload type.		    */
-    pj_uint32_t	     sender_ssrc;   /**< Sender SSRC.			    */
-    pj_uint32_t	     peer_ssrc;     /**< Peer SSRC.			    */
-    pj_uint16_t	     seq;	    /**< Sequence.			    */
-    pj_uint32_t	     ts;	    /**< Timestamp.			    */
+	int default_pt;			 /**< Default payload type.		    */
+	pj_uint32_t sender_ssrc; /**< Sender SSRC.			    */
+	pj_uint32_t peer_ssrc;   /**< Peer SSRC.			    */
+	pj_uint16_t seq;		 /**< Sequence.			    */
+	pj_uint32_t ts;			 /**< Timestamp.			    */
 } pjmedia_rtp_session_setting;
-
 
 /**
  * @see pjmedia_rtp_status
  */
 typedef struct pjmedia_rtp_status pjmedia_rtp_status;
-
 
 /**
  * This function will initialize the RTP session according to given parameters.
@@ -275,9 +265,10 @@ typedef struct pjmedia_rtp_status pjmedia_rtp_status;
  *
  * @return		PJ_SUCCESS if successfull.
  */
-PJ_DECL(pj_status_t) pjmedia_rtp_session_init( pjmedia_rtp_session *ses,
-					       int default_pt, 
-					       pj_uint32_t sender_ssrc );
+PJ_DECL(pj_status_t)
+pjmedia_rtp_session_init(pjmedia_rtp_session *ses,
+						 int default_pt,
+						 pj_uint32_t sender_ssrc);
 
 /**
  * This function will initialize the RTP session according to given parameters
@@ -288,10 +279,10 @@ PJ_DECL(pj_status_t) pjmedia_rtp_session_init( pjmedia_rtp_session *ses,
  *
  * @return		PJ_SUCCESS if successfull.
  */
-PJ_DECL(pj_status_t) pjmedia_rtp_session_init2( 
-				    pjmedia_rtp_session *ses,
-				    pjmedia_rtp_session_setting settings);
-
+PJ_DECL(pj_status_t)
+pjmedia_rtp_session_init2(
+	pjmedia_rtp_session *ses,
+	pjmedia_rtp_session_setting settings);
 
 /**
  * Create the RTP header based on arguments and current state of the RTP
@@ -307,11 +298,12 @@ PJ_DECL(pj_status_t) pjmedia_rtp_session_init2(
  *
  * @return		PJ_SUCCESS if successfull.
  */
-PJ_DECL(pj_status_t) pjmedia_rtp_encode_rtp( pjmedia_rtp_session *ses, 
-					     int pt, int m,
-					     int payload_len, int ts_len,
-					     const void **rtphdr, 
-					     int *hdrlen );
+PJ_DECL(pj_status_t)
+pjmedia_rtp_encode_rtp(pjmedia_rtp_session *ses,
+					   int pt, int m,
+					   int payload_len, int ts_len,
+					   const void **rtphdr,
+					   int *hdrlen);
 
 /**
  * This function decodes incoming packet into RTP header and payload.
@@ -334,12 +326,12 @@ PJ_DECL(pj_status_t) pjmedia_rtp_encode_rtp( pjmedia_rtp_session *ses,
  *
  * @return		PJ_SUCCESS if successfull.
  */
-PJ_DECL(pj_status_t) pjmedia_rtp_decode_rtp( pjmedia_rtp_session *ses, 
-					     const void *pkt, int pkt_len,
-					     const pjmedia_rtp_hdr **hdr,
-					     const void **payload,
-					     unsigned *payloadlen);
-
+PJ_DECL(pj_status_t)
+pjmedia_rtp_decode_rtp(pjmedia_rtp_session *ses,
+					   const void *pkt, int pkt_len,
+					   const pjmedia_rtp_hdr **hdr,
+					   const void **payload,
+					   unsigned *payloadlen);
 
 /**
  * This function decodes incoming packet into RTP header and payload.
@@ -364,13 +356,14 @@ PJ_DECL(pj_status_t) pjmedia_rtp_decode_rtp( pjmedia_rtp_session *ses,
  *
  * @return		PJ_SUCCESS if successfull.
  */
-PJ_DECL(pj_status_t) pjmedia_rtp_decode_rtp2(
-				    pjmedia_rtp_session *ses,
-				    const void *pkt, int pkt_len,
-				    const pjmedia_rtp_hdr **hdr,
-				    pjmedia_rtp_dec_hdr *dec_hdr,
-				    const void **payload,
-				    unsigned *payloadlen);
+PJ_DECL(pj_status_t)
+pjmedia_rtp_decode_rtp2(
+	pjmedia_rtp_session *ses,
+	const void *pkt, int pkt_len,
+	const pjmedia_rtp_hdr **hdr,
+	pjmedia_rtp_dec_hdr *dec_hdr,
+	const void **payload,
+	unsigned *payloadlen);
 
 /**
  * Call this function everytime an RTP packet is received to check whether 
@@ -383,10 +376,10 @@ PJ_DECL(pj_status_t) pjmedia_rtp_decode_rtp2(
  * @param seq_st    Optional structure to receive the status of the RTP packet
  *		    processing.
  */
-PJ_DECL(void) pjmedia_rtp_session_update( pjmedia_rtp_session *ses, 
-					  const pjmedia_rtp_hdr *hdr,
-					  pjmedia_rtp_status *seq_st);
-
+PJ_DECL(void)
+pjmedia_rtp_session_update(pjmedia_rtp_session *ses,
+						   const pjmedia_rtp_hdr *hdr,
+						   pjmedia_rtp_status *seq_st);
 
 /**
  * Call this function everytime an RTP packet is received to check whether 
@@ -402,11 +395,11 @@ PJ_DECL(void) pjmedia_rtp_session_update( pjmedia_rtp_session *ses,
  *
  * @see pjmedia_rtp_session_update()
  */
-PJ_DECL(void) pjmedia_rtp_session_update2(pjmedia_rtp_session *ses, 
-					  const pjmedia_rtp_hdr *hdr,
-					  pjmedia_rtp_status *seq_st,
-					  pj_bool_t check_pt);
-
+PJ_DECL(void)
+pjmedia_rtp_session_update2(pjmedia_rtp_session *ses,
+							const pjmedia_rtp_hdr *hdr,
+							pjmedia_rtp_status *seq_st,
+							pj_bool_t check_pt);
 
 /*
  * INTERNAL:
@@ -419,9 +412,8 @@ PJ_DECL(void) pjmedia_rtp_session_update2(pjmedia_rtp_session *ses,
  * @param seq_ctrl  The sequence control instance.
  * @param seq	    Sequence number to initialize.
  */
-void pjmedia_rtp_seq_init(pjmedia_rtp_seq_session *seq_ctrl, 
-			  pj_uint16_t seq);
-
+void pjmedia_rtp_seq_init(pjmedia_rtp_seq_session *seq_ctrl,
+						  pj_uint16_t seq);
 
 /** 
  * Internal function update sequence control, shared by RTCP implementation.
@@ -431,9 +423,9 @@ void pjmedia_rtp_seq_init(pjmedia_rtp_seq_session *seq_ctrl,
  * @param seq_status	Optional structure to receive additional information 
  *			about the packet.
  */
-void pjmedia_rtp_seq_update( pjmedia_rtp_seq_session *seq_ctrl, 
-			     pj_uint16_t seq,
-			     pjmedia_rtp_status *seq_status);
+void pjmedia_rtp_seq_update(pjmedia_rtp_seq_session *seq_ctrl,
+							pj_uint16_t seq,
+							pjmedia_rtp_status *seq_status);
 
 /**
  * @}
@@ -441,5 +433,4 @@ void pjmedia_rtp_seq_update( pjmedia_rtp_seq_session *seq_ctrl,
 
 PJ_END_DECL
 
-
-#endif	/* __PJMEDIA_RTP_H__ */
+#endif /* __PJMEDIA_RTP_H__ */

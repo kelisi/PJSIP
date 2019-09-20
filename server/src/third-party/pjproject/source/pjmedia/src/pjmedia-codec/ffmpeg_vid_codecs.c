@@ -1216,10 +1216,10 @@ static pj_status_t open_ffmpeg_codec(ffmpeg_private *ff,
                                             width:[%d] height[%d] \n\
                                             fps:[%d/%d] \n \
                                             bitrate:%d",
-               ctx->pix_fmt,
-               ctx->width, ctx->height,
-               ctx->time_base.num, ctx->time_base.den,
-               ctx->bit_rate));
+               ff->enc_ctx->pix_fmt,
+               ff->enc_ctx->width, ff->enc_ctx->height,
+               ff->enc_ctx->time_base.num, ff->enc_ctx->time_base.den,
+               ff->enc_ctx->bit_rate));
 
     /* Init generic decoder params */
     if (ff->param.dir & PJMEDIA_DIR_DECODING)
@@ -1234,10 +1234,12 @@ static pj_status_t open_ffmpeg_codec(ffmpeg_private *ff,
         ctx->opaque = ff;
     }
 
-    PJ_LOG(3, (THIS_FILE, "[video][ffmpeg] init decoder params:
+    PJ_LOG(3, (THIS_FILE, "[video][ffmpeg] init decoder params: \
         width:[%d] height:[%d] \n \
-        strict_std_compliance:%d \n \
-        ",ctx->width, ctx->height, ctx->strict_std_compliance))
+        strict_std_compliance:%d \n",
+               ff->dec_ctx->width,
+               ff->dec_ctx->height,
+               ff->dec_ctx->strict_std_compliance));
 
     /* Override generic params or apply specific params before opening
      * the codec.

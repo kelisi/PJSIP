@@ -883,6 +883,7 @@ on_return:
 	/* Send RTCP RR and SDES after we receive some RTP packets */
 	if (stream->rtcp.received >= 10 && !stream->initial_rr)
 	{
+		PJ_LOG(3, (THIS_FILE,"[rtcp] send rtcp"));
 		status = send_rtcp(stream, !stream->rtcp_sdes_bye_disabled,
 						   PJ_FALSE);
 		if (status != PJ_SUCCESS)
@@ -1555,7 +1556,7 @@ static pj_status_t create_channel(pj_pool_t *pool,
 	channel->port.port_data.pdata = stream;
 
 	PJ_LOG(5, (name.ptr,
-			   "%s channel created %dx%d %s%s%.*s %d/%d(~%d)fps",
+			   "[video]%s channel created %dx%d %s%s%.*s %d/%d(~%d)fps",
 			   (dir == PJMEDIA_DIR_ENCODING ? "Encoding" : "Decoding"),
 			   pi->fmt.det.vid.size.w, pi->fmt.det.vid.size.h,
 			   pjmedia_fourcc_name(pi->fmt.id, fourcc_name),
@@ -1692,11 +1693,11 @@ pjmedia_vid_stream_create(
 												enc mtu:%d \n\
 												keyframe num:%d \n\
 												rtp cname:%s \n",
-												stream->dir,
-												stream->rtcp_interval,
-											    info->codec_param->enc_mtu,
-												stream->num_keyframe,
-												stream->cname));
+			   stream->dir,
+			   stream->rtcp_interval,
+			   info->codec_param->enc_mtu,
+			   stream->num_keyframe,
+			   stream->cname));
 
 	/* Create mutex to protect jitter buffer: */
 

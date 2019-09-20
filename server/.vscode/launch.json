@@ -76,7 +76,7 @@
             // "args": ["--config-file","/Users/chirpin-2/Documents/PJSIP/Code/Smotalk/server/src/third-party/pjproject/source/pjsip-apps/bin/test.cfg"],
             "args": [
                 "--config-file",
-                "/Users/chirpin-2/Documents/PJSIP/Code/Smotalk/server/src/third-party/pjproject/source/pjsip-apps/bin/test.cfg copy"
+                "${workspaceFolder}/src/third-party/pjproject/source/pjsip-apps/bin/test.cfg copy"
             ],
             // 是否停在程序入口点（停在main函数开始）
             "stopAtEntry": false,

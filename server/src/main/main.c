@@ -192,7 +192,7 @@ void test_char_array_cast_to_struct()
     unsigned char a[] = "0123456789ABCDEF";
     struct A
     {
-        int a;
+        int a;//对应"0123"--转ascii "48 49 50 51" 48<<24 + 49<<16 + 50<< 8 + 51 = 805306368
         char b;
         char c;
         char d;
@@ -200,7 +200,7 @@ void test_char_array_cast_to_struct()
     };
 
     int *n = (int *)"0";
-    printf("n = %p\n", *n);
+    printf("n = %d\n", *n);
 
     int *m = (int *)"0123";
     printf("m = %d\n", *m);

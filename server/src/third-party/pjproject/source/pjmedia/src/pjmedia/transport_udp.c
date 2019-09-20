@@ -499,7 +499,7 @@ static void on_rx_rtp(pj_ioqueue_key_t *key,
 			if ((pj_rand() % 100) <= (int)udp->rx_drop_pct)
 			{
 				PJ_LOG(5, (udp->base.name,
-						   "RX RTP packet dropped because of pkt lost "
+						   "[rtp]RX RTP packet dropped because of pkt lost "
 						   "simulation"));
 				discard = PJ_TRUE;
 			}

@@ -90,8 +90,6 @@ struct pjmedia_endpt
 	/** Is telephone-event enable */
 	pj_bool_t has_telephone_event;
 
-	// pj_bool_t show_rtp_packets;
-
 	/** List of exit callback. */
 	exit_cb exit_cb_list;
 };

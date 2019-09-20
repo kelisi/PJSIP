@@ -32,6 +32,7 @@
 #define RTP_SEQ_MOD (1 << 16)
 #define MAX_DROPOUT ((pj_int16_t)3000)
 #define MAX_MISORDER ((pj_int16_t)100)
+//最小值排序
 #define MIN_SEQUENTIAL ((pj_int16_t)2)
 
 static void pjmedia_rtp_seq_restart(pjmedia_rtp_seq_session *seq_ctrl,
@@ -317,14 +318,23 @@ void pjmedia_rtp_seq_init(pjmedia_rtp_seq_session *sess, pj_uint16_t seq)
 {
     pjmedia_rtp_seq_restart(sess, seq);
 
+    //通过最小值减1得到最大的sequence number
     sess->max_seq = (pj_uint16_t)(seq - 1);
     sess->probation = MIN_SEQUENTIAL;
+    PJ_LOG(3, (THIS_FILE, "[media][rtp] init rtp seq: base_seq->%d\n\
+                max_seq->%d\n \
+                probation->%d",
+               sess->bad_seq,
+               sess->max_seq,
+               sess->probation));
 }
 
 void pjmedia_rtp_seq_update(pjmedia_rtp_seq_session *sess,
                             pj_uint16_t seq,
                             pjmedia_rtp_status *seq_status)
 {
+    PJ_LOG(3, (THIS_FILE, "[media][rtp] pjmedia_rtp_seq_update seq update:%d", seq));
+
     pj_uint16_t udelta = (pj_uint16_t)(seq - sess->max_seq);
     pjmedia_rtp_status st;
 
@@ -341,6 +351,7 @@ void pjmedia_rtp_seq_update(pjmedia_rtp_seq_session *sess,
 
         st.status.flag.probation = 1;
 
+        //max_seq 为第一个包的sequence number 减1得到，因此此处+1判定
         if (seq == sess->max_seq + 1)
         {
             /* packet is in sequence */

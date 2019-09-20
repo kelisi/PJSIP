@@ -474,17 +474,20 @@ static pj_status_t jb_framelist_put_at(jb_framelist_t *framelist,
 
 	PJ_ASSERT_RETURN(frame_size <= framelist->frame_size, PJ_EINVAL);
 
-	/* too late or sequence restart */
+	/* too late or sequence restart （当前处理帧的sequence num 小于 当前缓存的首帧的 sequence num ）*/
 	if (index < framelist->origin)
 	{
+		//如果sequence差了低于100帧，则直接丢弃，不进行缓存，否则重新记录为新的起始帧
 		if (framelist->origin - index < MAX_MISORDER)
 		{
+			PJ_LOG(1, (THIS_FILE, "[media][jb] drop frame with preframe :%d come too late origin: %d", index, framelist->origin));
 			/* too late */
 			return PJ_ETOOSMALL;
 		}
 		else
 		{
-			/* sequence restart */
+			PJ_LOG(1, (THIS_FILE, "[media][jb] restart frame with preframe :%d come too late origin: %d", index, framelist->origin));
+			/* @fixme: 调试debug to confirm sequence restart ？？？*/
 			framelist->origin = index - framelist->size;
 		}
 	}
@@ -502,8 +505,10 @@ static pj_status_t jb_framelist_put_at(jb_framelist_t *framelist,
 	/* far jump, the distance is greater than buffer capacity */
 	if (distance >= (int)framelist->max_count)
 	{
+		/* 丢帧超过jb最大存储数量以及超过最大间隔则重新以此进行记录否则丢弃*/
 		if (distance > MAX_DROPOUT)
 		{
+			PJ_LOG(1, (THIS_FILE, "[media][jb] reset frame with current :%d too far away over :%d from origin:%d", framelist->origin, MAX_DROPOUT, index));
 			/* jump too far, reset the buffer */
 			jb_framelist_reset(framelist);
 			framelist->origin = index;
@@ -511,6 +516,8 @@ static pj_status_t jb_framelist_put_at(jb_framelist_t *framelist,
 		}
 		else
 		{
+			/* 丢帧超过jb最大存储数量未超过最大间隔则丢弃 */
+			PJ_LOG(1, (THIS_FILE, "[media][jb] reject frame (PJ_ETOOMANY) with current :%d over max_count:%d from origin: %d", index, (int)framelist->max_count, framelist->origin));
 			/* otherwise, reject the frame */
 			return PJ_ETOOMANY;
 		}
@@ -521,7 +528,10 @@ static pj_status_t jb_framelist_put_at(jb_framelist_t *framelist,
 
 	/* if the slot is occupied, it must be duplicated frame, ignore it. */
 	if (framelist->frame_type[pos] != PJMEDIA_JB_MISSING_FRAME)
+	{
+		PJ_LOG(1, (THIS_FILE, "[media][jb] drop frame:%d with slot :%d been occupied", index, pos));
 		return PJ_EEXISTS;
+	}
 
 	/* put the frame into the slot */
 	framelist->frame_type[pos] = frame_type;
@@ -589,6 +599,7 @@ pjmedia_jbuf_create(pj_pool_t *pool,
 
 	pj_strdup_with_null(pool, &jb->jb_name, name);
 	jb->jb_frame_size = frame_size;
+	//帧间隔，由帧率控制 单位ms 例如 1s 15f == 1/15 * 1000
 	jb->jb_frame_ptime = ptime;
 	jb->jb_prefetch = PJ_MIN(PJMEDIA_JB_DEFAULT_INIT_DELAY, max_count * 4 / 5);
 	jb->jb_min_prefetch = 0;
@@ -735,6 +746,7 @@ static void jbuf_calculate_jitter(pjmedia_jbuf *jb)
 {
 	int diff, cur_size;
 
+	//当前所存帧的数目
 	cur_size = jb_framelist_eff_size(&jb->jb_framelist);
 	pj_math_stat_update(&jb->jb_burst, jb->jb_level);
 	jb->jb_max_hist_level = PJ_MAX(jb->jb_max_hist_level, jb->jb_level);
@@ -1032,13 +1044,14 @@ pjmedia_jbuf_put_frame3(pjmedia_jbuf *jb,
 	int new_size, cur_size;
 	pj_status_t status;
 
+	//当前已经占用的frame 大小
 	cur_size = jb_framelist_eff_size(&jb->jb_framelist);
 
 	/* Check if frame size is larger than JB frame size */
 	if (frame_size > jb->jb_frame_size)
 	{
 		PJ_LOG(4, (THIS_FILE, "Warning: frame too large for jitter buffer, "
-							  "it will be truncated!"));
+							  "it will be truncated(裁剪)!"));
 	}
 
 	/* Attempt to store the frame */

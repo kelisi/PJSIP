@@ -5,3 +5,4 @@
 --password 1234
 --set-qos
 --video
+--rx-drop-pct=3

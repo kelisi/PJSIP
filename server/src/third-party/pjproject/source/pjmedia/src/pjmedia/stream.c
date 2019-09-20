@@ -1871,7 +1871,7 @@ static void on_rx_rtp(pjmedia_tp_cb_param *param)
 			char errmsg[PJ_ERR_MSG_SIZE];
 			pj_strerror(status, errmsg, sizeof(errmsg));
 			PJ_LOG(4, (stream->port.info.name.ptr,
-					   "Unable to receive RTP packet, recv() returned %d: %s",
+					   "[rtp]Unable to receive RTP packet, recv() returned %d: %s",
 					   status, errmsg));
 			stream->rtp_rx_last_err = status;
 		}
@@ -1886,7 +1886,7 @@ static void on_rx_rtp(pjmedia_tp_cb_param *param)
 	if (bytes_read < (pj_ssize_t)sizeof(pjmedia_rtp_hdr))
 		return;
 
-	/* Update RTP and RTCP session. */
+	/* Update RTP and RTCP session. 解析RTP包 */
 	status = pjmedia_rtp_decode_rtp(&channel->rtp, pkt, (int)bytes_read,
 									&hdr, &payload, &payloadlen);
 	if (status != PJ_SUCCESS)
@@ -1917,7 +1917,7 @@ static void on_rx_rtp(pjmedia_tp_cb_param *param)
 	if (seq_st.status.value)
 	{
 		TRC_((stream->port.info.name.ptr,
-			  "RTP status: badpt=%d, badssrc=%d, dup=%d, "
+			  "[media][rtp]RTP status: badpt=%d, badssrc=%d, dup=%d, "
 			  "outorder=%d, probation=%d, restart=%d",
 			  seq_st.status.flag.badpt,
 			  seq_st.status.flag.badssrc,
@@ -1929,14 +1929,14 @@ static void on_rx_rtp(pjmedia_tp_cb_param *param)
 		if (seq_st.status.flag.badpt)
 		{
 			PJ_LOG(4, (stream->port.info.name.ptr,
-					   "Bad RTP pt %d (expecting %d)",
+					   "[media][rtp]Bad RTP pt %d (expecting %d)",
 					   hdr->pt, channel->rtp.out_pt));
 		}
 
 		if (!stream->si.has_rem_ssrc && seq_st.status.flag.badssrc)
 		{
 			PJ_LOG(4, (stream->port.info.name.ptr,
-					   "Changed RTP peer SSRC %d (previously %d)",
+					   "[media][rtp]Changed RTP peer SSRC %d (previously %d)",
 					   channel->rtp.peer_ssrc, stream->rtcp.peer_ssrc));
 			stream->rtcp.peer_ssrc = channel->rtp.peer_ssrc;
 		}
@@ -1959,6 +1959,7 @@ static void on_rx_rtp(pjmedia_tp_cb_param *param)
 	/* Handle incoming DTMF. */
 	if (hdr->pt == stream->rx_event_pt)
 	{
+		PJ_LOG(3, (THIS_FILE,"[media][rtp][dtmf] receive dtmf packet"));
 		/* Ignore out-of-order packet as it will be detected as new
 	 * digit. Also ignore duplicate packet as it serves no use.
 	 */
@@ -2063,22 +2064,27 @@ static void on_rx_rtp(pjmedia_tp_cb_param *param)
 		/* Get the timestamp of the first sample */
 		ts.u64 = pj_ntohl(hdr->ts);
 
-		/* Parse the payload. */
+		/* Parse the payload. 编码解析RTP包数据
+		  @fixme:视频对应???：pjmedia_vid_codec_op->ffmpeg_codec_get_param
+		 */
 		status = pjmedia_codec_parse(stream->codec, (void *)payload,
 									 payloadlen, &ts, &count, frames);
+
+		PJ_LOG(3, (THIS_FILE,"[media][rtp] frame count: %d", count));
 		if (status != PJ_SUCCESS)
 		{
 			LOGERR_((stream->port.info.name.ptr,
-					 "Codec parse() error",
+					 "[media][rtp]Codec parse() error",
 					 status));
 			count = 0;
 		}
+		//目前针对opus 编码设置为检测
 		else if (stream->detect_ptime_change &&
 				 frames[0].bit_info > 0xFFFF)
 		{
 			unsigned dec_ptime;
 
-			PJ_LOG(4, (stream->port.info.name.ptr, "codec decode "
+			PJ_LOG(4, (stream->port.info.name.ptr, "[media][rtp]codec decode "
 												   "ptime change detected"));
 			frames[0].bit_info &= 0xFFFF;
 			dec_ptime = frames[0].bit_info * 1000 /
